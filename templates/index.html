@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Recognition and Translation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        textarea, select, button {
+            width: 600px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        #translated-text {
+            height: 100px;
+            resize: none;
+        }
+        .image-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .logo {
+            max-width: 100px;
+            height: auto;
+        }
+        /* Adjusted positioning for speech recognition elements */
+        #speech-text, #language, #translated-text {
+            margin-left: 120px;
+        }
+        button {
+            margin-left: 120px;
+        }
+        /* Added media query to adjust layout on smaller screens */
+        @media (max-width: 480px) {
+            .container {
+                max-width: 90%;
+            }
+            .image-container {
+                position: static;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .logo {
+                margin-bottom: 10px;
+            }
+            #speech-text, #language, #translated-text, button {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-container">
+           <img src="{{ url_for('static', filename='speech_recognition_logo.png') }}" alt="Speech Recognition Logo" class="logo">
+        </div>
+        <h1>Speech Recognition and Translation</h1>
+        <textarea id="speech-text" placeholder="Speak something..."></textarea>
+        <select id="language">
+            <option value="en">English</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="ar">Arabic</option> <!-- Added Arabic language option -->
+            <!-- Add more languages here -->
+        </select>
+        <button onclick="startRecognition()">Start Recognition</button>
+        <button onclick="downloadTranslatedText()">Download Translated Text</button> <!-- Added download button -->
+        <div>
+            <h2>Translated Text:</h2>
+            <textarea id="translated-text" readonly></textarea>
+        </div>
+    </div>
+    <script>
+        function startRecognition() {
+            var recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                var result = event.results[0][0].transcript;
+                document.getElementById('speech-text').value = result;
+                translateText(result);
+                recognition.stop();
+            };
+        }
+
+        function translateText(text) {
+            var language = document.getElementById('language').value;
+            fetch('/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text, language: language }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('translated-text').value = data.translated_text;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function downloadTranslatedText() {
+            var translatedText = document.getElementById('translated-text').value;
+            var filename = 'translated_text.txt';
+            var blob = new Blob([translatedText], { type: 'text/plain' });
+
+            if (navigator.msSaveBlob) { // IE 10+
+                navigator.msSaveBlob(blob, filename);
+            } else {
+                var link = document.createElement('a');
+                if (link.download !== undefined) {
+                    var url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', filename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
