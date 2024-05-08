@@ -5,16 +5,18 @@ This Flask application provides a simple web interface for speech recognition an
 2. Translate recognized speech into different languages.
 3. Easy-to-use web interface for seamless interaction.
 # Installation
-Clone the repository:
+1. Clone the repository:
 git clone https://github.com/your-username/your-repository.git
 
-Install the required dependencies:
+2. Install the required dependencies:
+```bash
 pip install Flask googletrans==4.0.0-rc1 SpeechRecognition
+```
 
-Run the Flask application:
+3. Run the Flask application:
 python app.py
 
-Access the application in your web browser at http://localhost:5000.
+4. Access the application in your web browser at http://localhost:5000.
 
 Usage
 Visit the home page of the application.
@@ -33,6 +35,7 @@ Make your changes.
 Commit your changes (git commit -am 'Add new feature')
 Push to the branch (git push origin feature)
 Create a new Pull Request.
-# License
-This project is licensed under the MIT License - see the LICENSE file for details.
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
 
